@@ -2,8 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router";
-import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./context/AuthContext";
 
 import MainLayout from "./pages/MainLayout";
 import Home from "./pages/Home";
@@ -19,13 +19,13 @@ import PrivateRoute from "./routes/PrivateRoute";
 const router = createBrowserRouter([
   {
     path: "/",
-    Component: MainLayout,
+    element: <MainLayout />,
     children: [
-      { index: true, Component: Home },
-      { path: "recipes", Component: Recipes },
-      { path: "recipes/:id", Component: RecipeDetails },
-      { path: "about", Component: About },
-      { path: "contact", Component: Contact },
+      { index: true, element: <Home /> },
+      { path: "recipes", element: <Recipes /> },
+      { path: "recipes/:id", element: <RecipeDetails /> },
+      { path: "about", element: <About /> },
+      { path: "contact", element: <Contact /> },
       {
         path: "dashboard",
         element: (
@@ -36,8 +36,8 @@ const router = createBrowserRouter([
       },
     ],
   },
-  { path: "/login", Component: Login },
-  { path: "/register", Component: Register },
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
 ]);
 
 createRoot(document.getElementById("root")).render(
@@ -47,10 +47,7 @@ createRoot(document.getElementById("root")).render(
       <Toaster
         position="top-right"
         toastOptions={{
-          style: {
-            fontFamily: "sans-serif",
-            fontSize: "13px",
-          },
+          style: { fontFamily: "sans-serif", fontSize: "13px" },
           success: { iconTheme: { primary: "#c8a96e", secondary: "#fff" } },
         }}
       />

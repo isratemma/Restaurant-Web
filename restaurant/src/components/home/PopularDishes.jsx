@@ -1,45 +1,10 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router";
 import { FiClock, FiStar } from "react-icons/fi";
+import allRecipes from "../../data/recipes";
 
-const dishes = [
-  {
-    id: 1,
-    name: "Truffle Pasta",
-    category: "Italian",
-    time: "30 min",
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&q=80",
-    description: "Rich black truffle pasta with parmesan and fresh herbs.",
-  },
-  {
-    id: 2,
-    name: "Beef Wellington",
-    category: "British",
-    time: "90 min",
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80",
-    description: "Classic beef tenderloin wrapped in golden puff pastry.",
-  },
-  {
-    id: 3,
-    name: "Crème Brûlée",
-    category: "French",
-    time: "45 min",
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=400&q=80",
-    description: "Silky vanilla custard with a perfectly caramelized sugar crust.",
-  },
-  {
-    id: 4,
-    name: "Lobster Bisque",
-    category: "Seafood",
-    time: "60 min",
-    rating: 4.7,
-    image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&q=80",
-    description: "Velvety smooth bisque with fresh lobster and cream.",
-  },
-];
+// Show first 4 recipes as popular dishes
+const dishes = allRecipes.slice(0, 4);
 
 const cardVariants = {
   hidden: { opacity: 0, y: 40 },
