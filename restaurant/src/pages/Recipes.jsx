@@ -1,105 +1,159 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import { motion, AnimatePresence } from "framer-motion";
-import { FiSearch, FiClock, FiStar, FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { motion } from "framer-motion";
+import { FiSearch, FiClock, FiUser, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import allRecipes from "../data/recipes";
 
 const categories = ["All", "Italian", "French", "British", "Seafood", "Japanese", "Breakfast"];
 
-// Individual card with expandable description
+// ─── Featured Slider ────────────────────────────────────────────────────────
+const FeaturedSlider = ({ recipes }) => {
+  const [current, setCurrent] = useState(0);
+  const featured = recipes.slice(0, 5);
+
+  const prev = () => setCurrent((c) => (c === 0 ? featured.length - 1 : c - 1));
+  const next = () => setCurrent((c) => (c === featured.length - 1 ? 0 : c + 1));
+
+  // Show 3 cards at a time (current-1, current, current+1)
+  const getVisible = () => {
+    return [-1, 0, 1].map((offset) => {
+      const idx = (current + offset + featured.length) % featured.length;
+      return { recipe: featured[idx], offset };
+    });
+  };
+
+  return (
+    <div className="mb-16">
+      {/* Images row */}
+      <div className="relative overflow-hidden">
+        <div className="grid grid-cols-3 gap-0 h-64 md:h-80">
+          {getVisible().map(({ recipe, offset }) => (
+            <div key={recipe.id + offset} className="overflow-hidden relative">
+              <img
+                src={recipe.image}
+                alt={recipe.name}
+                className="w-full h-full object-cover"
+              />
+              {/* Category badge */}
+              <span className="absolute top-3 left-3 bg-[#c8a96e] text-white text-[10px] uppercase tracking-widest px-2 py-1 font-medium">
+                {recipe.category}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Arrows */}
+        <button
+          onClick={prev}
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white flex items-center justify-center shadow-md transition-all z-10"
+        >
+          <FiChevronLeft className="text-[#1a1a1a]" size={18} />
+        </button>
+        <button
+          onClick={next}
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white flex items-center justify-center shadow-md transition-all z-10"
+        >
+          <FiChevronRight className="text-[#1a1a1a]" size={18} />
+        </button>
+      </div>
+
+      {/* Text row below images */}
+      <div className="grid grid-cols-3 gap-0 border-b border-[#e8e0d0]">
+        {getVisible().map(({ recipe, offset }) => (
+          <div
+            key={recipe.id + offset + "text"}
+            className="px-6 py-5 border-r border-[#e8e0d0] last:border-r-0"
+          >
+            <Link to={`/recipes/${recipe.id}`}>
+              <h3 className="font-serif font-bold text-[#1a1a1a] text-base md:text-lg leading-snug mb-2 hover:text-[#c8a96e] transition-colors line-clamp-2">
+                {recipe.name}
+              </h3>
+            </Link>
+            <div className="flex items-center gap-3 text-[#aaa] text-xs mb-3">
+              <span className="flex items-center gap-1">
+                <FiUser size={11} /> Chef Bouffe
+              </span>
+              <span>·</span>
+              <span>10 Comments</span>
+              <span>·</span>
+              <span className="flex items-center gap-1">
+                <FiClock size={11} /> {recipe.time}
+              </span>
+            </div>
+            <p className="text-xs text-[#888] leading-relaxed line-clamp-3">
+              {recipe.description}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Dots */}
+      <div className="flex justify-center gap-2 mt-5">
+        {featured.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`w-2 h-2 rounded-full transition-all duration-200 ${
+              i === current ? "bg-[#c8a96e] w-5" : "bg-[#ddd]"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── Recipe Grid Card ────────────────────────────────────────────────────────
 const RecipeCard = ({ dish, index }) => {
   const [expanded, setExpanded] = useState(false);
-
-  // Short preview — first sentence only
-  const shortDesc = dish.description.split(".")[0] + ".";
+  const shortDesc = dish.description.substring(0, 100) + "...";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.07, duration: 0.4 }}
-      className="group bg-white border border-[#f0e8d8] hover:border-[#c8a96e] transition-colors duration-300 flex flex-col"
+      transition={{ delay: index * 0.06, duration: 0.4 }}
+      className="group"
     >
-      {/* Image — clicking navigates to detail page */}
-      <Link to={`/recipes/${dish.id}`} className="block overflow-hidden">
-        <img
-          src={dish.image}
-          alt={dish.name}
-          className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-500"
-        />
+      {/* Image with badge — clicking goes to detail page */}
+      <Link to={`/recipes/${dish.id}`}>
+        <div className="relative overflow-hidden mb-3">
+          <img
+            src={dish.image}
+            alt={dish.name}
+            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+          <span className="absolute top-3 left-3 bg-[#c8a96e] text-white text-[10px] uppercase tracking-widest px-2 py-1 font-medium">
+            {dish.category}
+          </span>
+        </div>
+        <h3 className="font-serif font-bold text-[#1a1a1a] text-sm md:text-base leading-snug mb-2 group-hover:text-[#c8a96e] transition-colors line-clamp-2">
+          {dish.name}
+        </h3>
+        <div className="flex items-center gap-2 text-[#aaa] text-xs mb-2">
+          <span className="flex items-center gap-1"><FiUser size={10} /> Chef Bouffe</span>
+          <span>·</span>
+          <span className="flex items-center gap-1"><FiClock size={10} /> {dish.time}</span>
+        </div>
       </Link>
 
-      <div className="p-5 flex flex-col flex-1">
-        <p className="text-[#c8a96e] text-xs uppercase tracking-widest mb-1">{dish.category}</p>
-
-        {/* Title — also navigates */}
-        <Link to={`/recipes/${dish.id}`}>
-          <h3 className="text-base font-serif font-bold text-[#1a1a1a] mb-2 hover:text-[#c8a96e] transition-colors">
-            {dish.name}
-          </h3>
-        </Link>
-
-        {/* Description — collapsed by default, expands on click */}
-        <div className="mb-3">
-          <AnimatePresence initial={false}>
-            {expanded ? (
-              <motion.p
-                key="full"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="text-xs text-[#666] leading-relaxed"
-              >
-                {dish.description}
-              </motion.p>
-            ) : (
-              <motion.p
-                key="short"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-xs text-[#888] leading-relaxed"
-              >
-                {shortDesc}
-              </motion.p>
-            )}
-          </AnimatePresence>
-
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-[#c8a96e] text-xs font-medium mt-2 hover:text-[#b8955a] transition-colors"
-          >
-            {expanded ? (
-              <><FiChevronUp size={13} /> Show less</>
-            ) : (
-              <><FiChevronDown size={13} /> Read more</>
-            )}
-          </button>
-        </div>
-
-        {/* Meta + View Recipe */}
-        <div className="mt-auto pt-3 border-t border-[#f0e8d8] flex items-center justify-between">
-          <div className="flex items-center gap-4 text-xs text-[#888]">
-            <span className="flex items-center gap-1">
-              <FiClock className="text-[#c8a96e]" /> {dish.time}
-            </span>
-            <span className="flex items-center gap-1">
-              <FiStar className="text-[#c8a96e]" /> {dish.rating}
-            </span>
-          </div>
-          <Link
-            to={`/recipes/${dish.id}`}
-            className="text-xs uppercase tracking-widest text-[#c8a96e] hover:text-[#b8955a] font-medium transition-colors"
-          >
-            View →
-          </Link>
-        </div>
+      {/* Description with expand toggle — does NOT navigate */}
+      <div>
+        <p className="text-xs text-[#888] leading-relaxed">
+          {expanded ? dish.description : shortDesc}
+        </p>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="text-[#c8a96e] text-xs font-medium mt-1 hover:text-[#b8955a] transition-colors underline underline-offset-2"
+        >
+          {expanded ? "Show less" : "Read more"}
+        </button>
       </div>
     </motion.div>
   );
 };
 
+// ─── Main Page ───────────────────────────────────────────────────────────────
 const Recipes = () => {
   const [searchParams] = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
@@ -113,15 +167,15 @@ const Recipes = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#faf9f6]">
+    <div className="min-h-screen bg-white">
       {/* Page header */}
-      <div className="bg-white border-b border-[#e8e0d0] py-16 text-center">
+      <div className="bg-white border-b border-[#e8e0d0] py-14 text-center">
         <p className="text-[#c8a96e] text-xs uppercase tracking-[0.3em] mb-3">Explore</p>
         <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#1a1a1a]">All Recipes</h1>
         <div className="w-12 h-0.5 bg-[#c8a96e] mx-auto mt-5" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Search */}
         <div className="flex items-center bg-white border border-[#e0d5c0] max-w-lg mx-auto mb-8 shadow-sm">
           <FiSearch className="ml-4 text-[#c8a96e]" />
@@ -151,15 +205,22 @@ const Recipes = () => {
           ))}
         </div>
 
-        {/* Grid */}
         {filtered.length === 0 ? (
           <p className="text-center text-[#888] py-20">No recipes found.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {filtered.map((dish, i) => (
-              <RecipeCard key={dish.id} dish={dish} index={i} />
-            ))}
-          </div>
+          <>
+            {/* Featured slider — only show when no search/filter active */}
+            {activeCategory === "All" && !query && (
+              <FeaturedSlider recipes={filtered} />
+            )}
+
+            {/* Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {filtered.map((dish, i) => (
+                <RecipeCard key={dish.id} dish={dish} index={i} />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
